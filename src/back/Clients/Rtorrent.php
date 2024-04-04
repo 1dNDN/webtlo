@@ -180,7 +180,7 @@ final class Rtorrent implements ClientInterface
         foreach ($torrentHashes as $torrentHash) {
             $executeDeleteFiles = ['', 'true'];
             if ($deleteFiles) {
-                $dataPath = $this->makeRequest('d.data_path', $torrentHash);
+                $dataPath = $this->makeRequest('d.data_path', [$torrentHash]);
                 if (!empty($dataPath)) {
                     $executeDeleteFiles = ['', 'rm', '-rf', '--', $dataPath];
                 }

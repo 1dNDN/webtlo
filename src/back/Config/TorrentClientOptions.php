@@ -22,6 +22,9 @@ final class TorrentClientOptions
     ) {
     }
 
+    /**
+     * @return array{timeout: int, connect_timeout: int}
+     */
     public function getTimeoutOptions(): array
     {
         return [
@@ -30,10 +33,13 @@ final class TorrentClientOptions
         ];
     }
 
-    public function getBasicAuth(): array
+    /**
+     * @return ?array{auth: array{string, string}}
+     */
+    public function getBasicAuth(): ?array
     {
         if (null === $this->credentials) {
-            return [];
+            return null;
         }
 
         return [
@@ -62,6 +68,7 @@ final class TorrentClientOptions
             $auth
         );
     }
+
     /**
      * Параметры клиента из данных в конфиге.
      */

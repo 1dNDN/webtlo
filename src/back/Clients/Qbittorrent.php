@@ -33,8 +33,19 @@ final class Qbittorrent implements ClientInterface
     /** Пауза между добавлением раздач в торрент-клиент, миллисекунды. */
     private int $torrentAddingSleep = 100;
 
-    private ?array $categories  = null;
-    private array  $errorStates = ['error', 'missingFiles', 'unknown'];
+    /**
+     * Категории раздач в клиенте.
+     *
+     * @var ?string[]
+     */
+    private ?array $categories = null;
+
+    /**
+     * Статусы ошибок.
+     *
+     * @var string[]
+     */
+    private array $errorStates = ['error', 'missingFiles', 'unknown'];
 
     private Client    $client;
     private CookieJar $jar;

@@ -30,8 +30,14 @@ final class Transmission implements ClientInterface
 
     private const TOKEN = 'X-Transmission-Session-Id';
 
-    private bool  $authenticated = false;
-    private array $headers       = [];
+    private bool $authenticated = false;
+
+    /**
+     * Заголовки для хранения ключа авторизации.
+     *
+     * @var array<string, string>
+     */
+    private array $headers = [];
 
     /** Позволяет ли клиент присваивать раздаче категорию при добавлении. */
     protected bool $categoryAddingAllowed = true;

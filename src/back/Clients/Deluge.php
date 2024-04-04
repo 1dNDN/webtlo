@@ -29,6 +29,7 @@ final class Deluge implements ClientInterface
     /** Счетчик запросов API. */
     private int $counter = 1;
 
+    /** @var ?string[]  */
     private ?array $labels = null;
 
     private Client    $client;
@@ -309,9 +310,6 @@ final class Deluge implements ClientInterface
                 return false;
             }
             $this->labels = $this->makeRequest(method: 'label.get_labels');
-        }
-        if (null === $this->labels) {
-            return false;
         }
 
         if (in_array($labelName, array_map('strtolower', $this->labels))) {

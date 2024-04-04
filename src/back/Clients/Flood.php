@@ -29,7 +29,7 @@ final class Flood implements ClientInterface
     /** Позволяет ли клиент присваивать раздаче категорию при добавлении. */
     private bool $categoryAddingAllowed = true;
 
-    private int   $responseHttpCode;
+    /** @var string[]  */
     private array $errorStates = [
         '/.*Couldn\'t connect.*/',
         '/.*error.*/',
