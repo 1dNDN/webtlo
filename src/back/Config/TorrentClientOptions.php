@@ -34,12 +34,12 @@ final class TorrentClientOptions
     }
 
     /**
-     * @return ?array{auth: array{string, string}}
+     * @return array{}|array{auth: array{string, string}}
      */
-    public function getBasicAuth(): ?array
+    public function getBasicAuth(): array
     {
         if (null === $this->credentials) {
-            return null;
+            return [];
         }
 
         return [
