@@ -146,10 +146,10 @@ final class WebTLO
         $about['php_version']    = phpversion();
         $about['sqlite_version'] = SQLite3::version()['versionString'];
 
-        $about['memory_limit']       = ini_get('memory_limit') ?: 'unknown';
-        $about['max_execution_time'] = ini_get('max_execution_time') ?: 'unknown';
-        $about['max_input_time']     = ini_get('max_input_time') ?: 'unknown';
-        $about['max_input_vars']     = ini_get('max_input_vars') ?: 'unknown';
+        $about['memory_limit']       = ini_get('memory_limit');
+        $about['max_execution_time'] = ini_get('max_execution_time');
+        $about['max_input_time']     = ini_get('max_input_time');
+        $about['max_input_vars']     = ini_get('max_input_vars');
 
         $about['date_timezone'] = ini_get('date.timezone') ?: date_default_timezone_get();
 
