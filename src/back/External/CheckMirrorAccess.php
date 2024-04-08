@@ -61,7 +61,7 @@ final class CheckMirrorAccess
         try {
             $this->logger->debug('Проверяем доступность адреса', $log);
 
-            $response = $client->get($path);
+            $response = $client->get($path, ['max_retry_attempts' => 2]);
             $result   = $response->getBody()->getContents();
 
             $this->logger->debug('Ответ получен', $log);
