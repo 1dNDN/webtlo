@@ -40,10 +40,13 @@ final class ApiReportClient
             $response = $e->getResponse();
             $this->logger->error(
                 'Не удалось авторизоваться в report-api. Проверьте ключи доступа.',
-                [$response->getStatusCode(), $response->getReasonPhrase()]
+                ['code' => $response->getStatusCode(), 'error' => $response->getReasonPhrase()]
             );
         } catch (GuzzleException $e) {
-            $this->logger->error('Ошибка при попытке авторизации в report-api.', [$e->getCode(), $e->getMessage()]);
+            $this->logger->error(
+                'Ошибка при попытке авторизации в report-api.',
+                ['code' => $e->getCode(), 'error' => $e->getMessage()]
+            );
         }
 
         return false;
@@ -73,7 +76,7 @@ final class ApiReportClient
         try {
             $response = $this->client->post('releases/set_status', ['json' => $params]);
         } catch (GuzzleException $e) {
-            $this->logger->error('Failed to fetch page', [$e->getCode(), $e->getMessage(), ...$params]);
+            $this->logException($e->getCode(), $e->getMessage(), $params);
 
             return null;
         }
@@ -98,7 +101,7 @@ final class ApiReportClient
         try {
             $response = $this->client->post('subforum/set_status', ['query' => $params]);
         } catch (GuzzleException $e) {
-            $this->logger->error('Failed to fetch page', [$e->getCode(), $e->getMessage(), ...$params]);
+            $this->logException($e->getCode(), $e->getMessage(), $params);
 
             return false;
         }
@@ -120,7 +123,7 @@ final class ApiReportClient
         try {
             $response = $this->client->get("subforum/$forumId/reports", ['query' => $params]);
         } catch (GuzzleException $e) {
-            $this->logger->error('Failed to fetch page', [$e->getCode(), $e->getMessage(), ...$params]);
+            $this->logException($e->getCode(), $e->getMessage(), $params);
 
             return null;
         }
@@ -128,5 +131,25 @@ final class ApiReportClient
         $body = $response->getBody()->getContents();
 
         return json_decode($body, true);
+    }
+
+    /**
+     * Записать ошибку в логгер.
+     *
+     * @param int                  $code
+     * @param string               $message
+     * @param array<string, mixed> $params
+     * @return void
+     */
+    private function logException(int $code, string $message, array $params = []): void
+    {
+        $this->logger->error(
+            'Ошибка выполнения запроса',
+            ['code' => $code, 'error' => htmlspecialchars(trim($message))]
+        );
+
+        if (!empty($params)) {
+            $this->logger->debug('Failed params', $params);
+        }
     }
 }
