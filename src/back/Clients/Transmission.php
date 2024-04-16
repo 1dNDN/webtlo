@@ -128,7 +128,7 @@ final class Transmission implements ClientInterface
     {
         $content = file_get_contents($torrentFilePath);
         if ($content === false) {
-            $this->logger->error("Failed to upload file", ['filename' => basename($torrentFilePath)]);
+            $this->logger->error('Failed to upload file', ['filename' => basename($torrentFilePath)]);
 
             return false;
         }
@@ -303,7 +303,7 @@ final class Transmission implements ClientInterface
         try {
             $response = $this->request($method, $params);
         } catch (GuzzleException $e) {
-            $this->logger->error('Failed to make request', ['error' => $e->getCode(), 'message' => $e->getMessage()]);
+            $this->logger->error('Failed to make request', ['code' => $e->getCode(), 'message' => $e->getMessage()]);
             throw new RuntimeException('Failed to make request');
         }
 
@@ -325,7 +325,14 @@ final class Transmission implements ClientInterface
 
     private function validateResponse(ResponseInterface $response): array
     {
-        $array = json_decode($response->getBody()->getContents(), true);
+        $body  = $response->getBody()->getContents();
+        $array = json_decode($body, true);
+
+        if (null === $array) {
+            $this->logger->error('Fail to decode api response', [htmlspecialchars(trim($body))]);
+
+            throw new RuntimeException('Unsuccessful api request');
+        }
 
         if ('success' !== $array['result']) {
             $this->logger->error('Unsuccessful api request', $array);
@@ -352,9 +359,10 @@ final class Transmission implements ClientInterface
 
                 // Дописываем токен авторизации в текущий запрос.
                 $request = $request->withAddedHeader($tokenName, $sid);
+
                 // Записываем токен авторизации в заголовки.
-                $logger->debug('Got transmission auth token', [$sid]);
                 $headers[$tokenName] = $sid;
+                $logger->debug('Got transmission auth token', [$sid]);
             }
         };
     }
