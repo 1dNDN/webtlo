@@ -96,7 +96,9 @@ final class KeepersSeeders
                 )"
             );
 
-            $this->logger->info(sprintf('KeepersSeeders. Записано %d хранимых раздач.', $keepersSeedersCount));
+            $this->logger->info(
+                sprintf('KeepersSeeders. Хранителями раздаётся %d неуникальных раздач.', $keepersSeedersCount)
+            );
         }
     }
 

@@ -373,7 +373,7 @@ final class Subsections
 
         $this->logger->info(
             sprintf(
-                'Обработано хранимых подразделов: %d шт, раздач в них %d шт.',
+                'Обработано хранимых подразделов: %d шт, уникальных раздач в них %d шт.',
                 count($updatedSubsections),
                 $countTopicsUpdate + $countTopicsInsert
             )
