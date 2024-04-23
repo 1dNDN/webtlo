@@ -29,7 +29,7 @@ final class Deluge implements ClientInterface
     /** Счетчик запросов API. */
     private int $counter = 1;
 
-    /** @var ?string[]  */
+    /** @var ?string[] */
     private ?array $labels = null;
 
     private Client    $client;
@@ -248,6 +248,9 @@ final class Deluge implements ClientInterface
     }
 
     /**
+     * @param string            $method
+     * @param array<int, mixed> $params
+     * @return ResponseInterface
      * @throws GuzzleException
      */
     private function request(string $method, array $params = []): ResponseInterface
@@ -261,12 +264,17 @@ final class Deluge implements ClientInterface
         return $this->client->post('', ['json' => $options]);
     }
 
+    /**
+     * @param string            $method
+     * @param array<int, mixed> $params
+     * @return array<int|string, mixed>
+     */
     private function makeRequest(string $method, array $params = []): array
     {
         try {
             $response = $this->request(method: $method, params: $params);
         } catch (GuzzleException $e) {
-            $this->logger->error('Failed to make request', ['error' => $e->getCode(), 'message' => $e->getMessage()]);
+            $this->logger->error('Failed to make request', ['code' => $e->getCode(), 'message' => $e->getMessage()]);
             throw new RuntimeException('Failed to make request');
         }
 
@@ -280,6 +288,11 @@ final class Deluge implements ClientInterface
         return (array)$array['result'];
     }
 
+    /**
+     * @param string            $method
+     * @param array<int, mixed> $params
+     * @return bool
+     */
     private function sendRequest(string $method, array $params = []): bool
     {
         try {

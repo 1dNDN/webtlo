@@ -281,6 +281,9 @@ final class Transmission implements ClientInterface
     }
 
     /**
+     * @param string               $method
+     * @param array<string, mixed> $options
+     * @return ResponseInterface
      * @throws GuzzleException
      */
     private function request(string $method, array $options = []): ResponseInterface
@@ -298,6 +301,11 @@ final class Transmission implements ClientInterface
         return $this->client->post('', $options);
     }
 
+    /**
+     * @param string               $method
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     private function makeRequest(string $method, array $params = []): array
     {
         try {
@@ -310,6 +318,11 @@ final class Transmission implements ClientInterface
         return $this->validateResponse($response);
     }
 
+    /**
+     * @param string               $method
+     * @param array<string, mixed> $params
+     * @return bool
+     */
     private function sendRequest(string $method, array $params = []): bool
     {
         try {
@@ -323,6 +336,10 @@ final class Transmission implements ClientInterface
         return false;
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @return array<string, mixed>
+     */
     private function validateResponse(ResponseInterface $response): array
     {
         $body  = $response->getBody()->getContents();
@@ -342,6 +359,10 @@ final class Transmission implements ClientInterface
         return (array)$array['arguments'];
     }
 
+    /**
+     * @param array<string, mixed> $headers
+     * @return callable
+     */
     private function getLoginHandler(array &$headers): callable
     {
         $logger    = $this->logger;
