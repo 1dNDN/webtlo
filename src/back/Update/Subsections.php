@@ -67,69 +67,101 @@ final class Subsections
         // Находим список игнорируемых хранителей.
         $excludedKeepers = KeepersSeeders::getExcludedKeepersList($config);
 
-        $this->keepersSeeders->setExcludedKeepers($excludedKeepers);
-        if (count($excludedKeepers)) {
-            $this->logger->debug('KeepersSeeders. Исключены хранители', $excludedKeepers);
-        }
-
-        /** @var int[] $subsections */
-        $subsections = array_map('intval', $subsections);
-        sort($subsections);
-
-        // Обновим каждый хранимый подраздел.
+        $subsectionsString = '';
         foreach ($subsections as $forumId) {
-            // Получаем дату предыдущего обновления подраздела.
-            $forumLastUpdated = $this->updateTime->getMarkerTime(marker: $forumId);
-
-            // Если не прошёл час с прошлого обновления - пропускаем подраздел.
-            if (time() - $forumLastUpdated->getTimestamp() < 3600) {
-                $this->skipSubsections[] = $forumId;
-
-                continue;
-            }
-
-            // Получаем данные о раздачах.
-            Timers::start("update_forum_$forumId");
-            $topicResponse = $this->apiClient->getForumTopicsData(forumId: $forumId);
-            if ($topicResponse instanceof ApiError) {
-                $this->skipSubsections[] = $forumId;
-
-                $this->logger->error(
-                    'Не получены данные о подразделе №{forumId}',
-                    ['forumId' => $forumId, 'code' => $topicResponse->code, 'text' => $topicResponse->text]
-                );
-
-                continue;
-            }
-
-            // Запоминаем время обновления подраздела.
-            $this->updateTime->addMarkerUpdate(marker: $forumId, updateTime: $topicResponse->updateTime);
-
-            // Получение данных о сидах, в зависимости от дат обновления.
-            $avgProcessor = Seeders::AverageProcessor(
-                (bool) $config['avg_seeders'],
-                $forumLastUpdated,
-                $topicResponse->updateTime
-            );
-
-            // Обрабатываем полученные раздачи, и записываем во временную таблицу.
-            $this->processSubsectionTopics($topicResponse->topics, $avgProcessor);
-
-            $this->logger->debug(
-                sprintf(
-                    'Список раздач подраздела № %-4d (%d шт. %s) обновлён за %2s.',
-                    $forumId,
-                    count($topicResponse->topics),
-                    Helper::convertBytes($topicResponse->totalSize, 9),
-                    Timers::getExecTime("update_forum_$forumId")
-                )
-            );
+            $subsectionsString .= $forumId . ' ';
         }
+        $subsectionsString = trim($subsectionsString);
 
-        $this->checkSkippedSubsections();
+        $this->logger->info(
+            'Подразделы {sec}.',
+            ['sec' => $subsectionsString]
+        );
 
-        // Успешно обновлённые подразделы.
-        $this->moveUpdatedTopics($subsections);
+        $excludedKeepersString = '';
+        foreach ($excludedKeepers as $forumId) {
+            $excludedKeepersString .= $forumId . ' ';
+        }
+        $excludedKeepersString = trim($excludedKeepersString);
+
+        $this->logger->info(
+            'Забаненные киперы {sec}.',
+            ['sec' => $excludedKeepersString]
+        );
+
+        $command = "C:/Users/nikit/RiderProjects/TloSql/NativeTloApp/bin/Release/net8.0/win-x64/publish/NativeTloApp.exe \"C:/Users/nikit/PhpstormProjects/webtlo/src/data/webtlo.db\" \"" . $subsectionsString . "\" \"" . $excludedKeepersString . "\"";
+
+        $this->logger->info(
+            'Команда {sec}.',
+            ['sec' => $command]
+        );
+
+
+        exec($command);
+
+        // $this->keepersSeeders->setExcludedKeepers($excludedKeepers);
+        // if (count($excludedKeepers)) {
+        //     $this->logger->debug('KeepersSeeders. Исключены хранители', $excludedKeepers);
+        // }
+        //
+        // /** @var int[] $subsections */
+        // $subsections = array_map('intval', $subsections);
+        // sort($subsections);
+        //
+        // // Обновим каждый хранимый подраздел.
+        // foreach ($subsections as $forumId) {
+        //     // Получаем дату предыдущего обновления подраздела.
+        //     $forumLastUpdated = $this->updateTime->getMarkerTime(marker: $forumId);
+        //
+        //     // Если не прошёл час с прошлого обновления - пропускаем подраздел.
+        //     if (time() - $forumLastUpdated->getTimestamp() < 3600) {
+        //         $this->skipSubsections[] = $forumId;
+        //
+        //         continue;
+        //     }
+        //
+        //     // Получаем данные о раздачах.
+        //     Timers::start("update_forum_$forumId");
+        //     $topicResponse = $this->apiClient->getForumTopicsData(forumId: $forumId);
+        //     if ($topicResponse instanceof ApiError) {
+        //         $this->skipSubsections[] = $forumId;
+        //
+        //         $this->logger->error(
+        //             'Не получены данные о подразделе №{forumId}',
+        //             ['forumId' => $forumId, 'code' => $topicResponse->code, 'text' => $topicResponse->text]
+        //         );
+        //
+        //         continue;
+        //     }
+        //
+        //     // Запоминаем время обновления подраздела.
+        //     $this->updateTime->addMarkerUpdate(marker: $forumId, updateTime: $topicResponse->updateTime);
+        //
+        //     // Получение данных о сидах, в зависимости от дат обновления.
+        //     $avgProcessor = Seeders::AverageProcessor(
+        //         (bool) $config['avg_seeders'],
+        //         $forumLastUpdated,
+        //         $topicResponse->updateTime
+        //     );
+        //
+        //     // Обрабатываем полученные раздачи, и записываем во временную таблицу.
+        //     $this->processSubsectionTopics($topicResponse->topics, $avgProcessor);
+        //
+        //     $this->logger->debug(
+        //         sprintf(
+        //             'Список раздач подраздела № %-4d (%d шт. %s) обновлён за %2s.',
+        //             $forumId,
+        //             count($topicResponse->topics),
+        //             Helper::convertBytes($topicResponse->totalSize, 9),
+        //             Timers::getExecTime("update_forum_$forumId")
+        //         )
+        //     );
+        // }
+        //
+        // $this->checkSkippedSubsections();
+        //
+        // // Успешно обновлённые подразделы.
+        // $this->moveUpdatedTopics($subsections);
 
         $this->logger->info(
             'Завершено обновление сведений о раздачах в хранимых подразделах за {sec}.',
