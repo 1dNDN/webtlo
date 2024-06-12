@@ -122,7 +122,16 @@ final class Creator
         $summary[] = $this->webtlo->versionLineUrl();
         $summary[] = '[hr]';
 
-        return implode($this->implodeGlue, [...$summary, '[list=1]', ...$savedSubsections, '[/list]']);
+        $summary = [...$summary, '[list=1]', ...$savedSubsections, '[/list]'];
+
+        // Проверяем возможность добавить в сводный отчёт данные о настройках.
+        $shared = $this->getSharedConfig();
+        if (null !== $shared) {
+            $summary[] = '[hr]';
+            $summary[] = sprintf('[spoiler="Настройки Web-TLO"]%s[/spoiler]', $shared);
+        }
+
+        return implode($this->implodeGlue, $summary);
     }
 
     public function getForumCount(): int
@@ -309,6 +318,39 @@ final class Creator
         }
 
         return $topicUrl;
+    }
+
+    private function getSharedConfig(): ?string
+    {
+        $config = $this->config;
+
+        if (empty($config['reports']['send_report_settings'])) {
+            return null;
+        }
+
+        $sharedConfig['proxy_activate_forum']  = (bool)$config['proxy_activate_forum'];
+        $sharedConfig['proxy_activate_api']    = (bool)$config['proxy_activate_api'];
+        $sharedConfig['proxy_activate_report'] = (bool)$config['proxy_activate_report'];
+
+        // Количество и тип используемых торрент клиентов.
+        $clients = array_map(fn($el) => $el['cl'], $config['clients'] ?? []);
+
+        $sharedConfig['clients'] = array_count_values($clients);
+
+        // Регулировка по подразделам.
+        $subsections = array_filter($config['subsections'] ?? [], fn($el) => !empty($el['control_peers']));
+        $subsections = array_map(fn($el) => (int)$el['control_peers'], $subsections);
+
+        ksort($subsections);
+
+        // Параметры регулировки.
+        $sharedConfig['control'] = [
+            'peers'       => (int)$config['topics_control']['peers'],
+            'keepers'     => (int)$config['topics_control']['keepers'],
+            'subsections' => $subsections,
+        ];
+
+        return json_encode($sharedConfig, JSON_UNESCAPED_UNICODE);
     }
 
     /**
