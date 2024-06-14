@@ -2,6 +2,7 @@
 
 use KeepersTeam\Webtlo\AppContainer;
 use KeepersTeam\Webtlo\Enum\UpdateMark;
+use KeepersTeam\Webtlo\Helper;
 use KeepersTeam\Webtlo\Module\LastUpdate;
 use KeepersTeam\Webtlo\Timers;
 use KeepersTeam\Webtlo\Update\KeepersReports;
@@ -18,21 +19,19 @@ Timers::start('update_keepers');
 $cfg = $app->getLegacyConfig();
 
 if (isset($checkEnabledCronAction)) {
-    $checkEnabledCronAction = $cfg['automation'][$checkEnabledCronAction] ?? -1;
-    if ($checkEnabledCronAction == 0) {
+    if (!Helper::isScheduleActionEnabled($cfg, $checkEnabledCronAction)) {
         $log->notice('KeepersLists. Автоматическое обновление списков других хранителей отключено в настройках.');
 
         return;
     }
 }
 
+
 // Находим список игнорируемых хранителей.
 $excludedKeepers = KeepersReports::getExcludedKeepersList($cfg);
 if (count($excludedKeepers)) {
     $log->debug('KeepersLists. Исключены хранители', $excludedKeepers);
 }
-
-$keepersUpdatedByApi = false;
 
 /** @var KeepersReports $keepersReports */
 $keepersReports = $app->get(KeepersReports::class);
